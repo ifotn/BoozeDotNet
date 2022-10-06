@@ -26,3 +26,7 @@ table.sortable th:hover {
     text-decoration: none !important;
     cursor: default !important;
 }
+
+.thumb {
+    height: 100px;
+}

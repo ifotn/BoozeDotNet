@@ -1,16 +1,15 @@
 ﻿@model BoozeDotNet.Models.Product
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Product";
 }
 
-<h1>Edit</h1>
+<h1>Edit Product Details</h1>
 
-<h4>Product</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ProductId" />
             <div class="form-group">
@@ -30,8 +29,11 @@
             </div>
             <div class="form-group">
                 <label asp-for="Photo" class="control-label"></label>
-                <input asp-for="Photo" class="form-control" />
+                <input asp-for="Photo" class="form-control" type="file" />
                 <span asp-validation-for="Photo" class="text-danger"></span>
+                @if (Model.Photo != null) {
+                    <img src="~/img/products/@Model.Photo" alt="Product Photo" />
+                }
             </div>
             <div class="form-group">
                 <label asp-for="CategoryId" class="control-label"></label>
@@ -41,6 +43,7 @@
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
+            <input type="hidden" name="CurrentPhoto" value="@Model.Photo" />
         </form>
     </div>
 </div>

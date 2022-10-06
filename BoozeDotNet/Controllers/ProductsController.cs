@@ -57,10 +57,17 @@ namespace BoozeDotNet.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,Name,Price,Description,Photo,CategoryId")] Product product)
+        public async Task<IActionResult> Create([Bind("ProductId,Name,Price,Description,CategoryId")] Product product, IFormFile? Photo)
         {
             if (ModelState.IsValid)
             {
+                // upload photo if any BEFORE creating the new product in the db as product needs the new Photo name
+                if (Photo != null)
+                {
+                    var fileName = UploadPhoto(Photo);
+                    product.Photo = fileName;
+                }
+
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -91,7 +98,7 @@ namespace BoozeDotNet.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Price,Description,Photo,CategoryId")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Price,Description,CategoryId")] Product product, IFormFile? Photo, string? CurrentPhoto)
         {
             if (id != product.ProductId)
             {
@@ -102,6 +109,17 @@ namespace BoozeDotNet.Controllers
             {
                 try
                 {
+                    if (Photo != null)
+                    {
+                        var fileName = UploadPhoto(Photo);
+                        product.Photo = fileName;
+                    }
+                    else
+                    {
+                        // keep existing photo if no new photo uploaded
+                        product.Photo = CurrentPhoto;
+                    }
+
                     _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
@@ -163,6 +181,27 @@ namespace BoozeDotNet.Controllers
         private bool ProductExists(int id)
         {
           return _context.Product.Any(e => e.ProductId == id);
+        }
+
+        private static string UploadPhoto(IFormFile Photo)
+        {
+            // get temp location of uploaded file
+            var filePath = Path.GetTempFileName();
+
+            // create unique name to prevent overwrites using Globally Unique Id class
+            // photo.jpg => q14klu89-photo.jpg
+            var fileName = Guid.NewGuid() + "-" + Photo.FileName;
+
+            // set destination path to wwwroot/img/products
+            var uploadPath = System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\img\\products\\" + fileName;
+
+            // copy the file to the target dir
+            using (var stream = new FileStream(uploadPath, FileMode.Create))
+            {
+                Photo.CopyTo(stream);
+            }
+
+            return fileName;
         }
     }
 }
