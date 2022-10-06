@@ -11,6 +11,7 @@ namespace BoozeDotNet.Models
         public string? Name { get; set; }
 
         [Range(0.01, 100000, ErrorMessage = "Sorry but that number is just ridiculous")]
+        [DisplayFormat(DataFormatString = "{0:c}")]
         public double Price { get; set; }
 
         [MaxLength(4000)]
@@ -19,6 +20,7 @@ namespace BoozeDotNet.Models
         public string? Photo { get; set; }
 
         // FK for Parent Category
+        [Display(Name = "Category")]
         public int CategoryId { get; set; }
 
         // Parent ref for auto-joins

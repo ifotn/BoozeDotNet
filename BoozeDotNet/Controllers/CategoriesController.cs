@@ -22,7 +22,7 @@ namespace BoozeDotNet.Controllers
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Categories.ToListAsync());
+              return View(await _context.Categories.OrderBy(c => c.Name).ToListAsync());
         }
 
         // GET: Categories/Details/5

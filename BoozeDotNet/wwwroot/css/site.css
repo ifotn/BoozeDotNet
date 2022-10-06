@@ -16,3 +16,13 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+table.sortable th:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.sorttable_nosort:hover  {
+    text-decoration: none !important;
+    cursor: default !important;
+}
