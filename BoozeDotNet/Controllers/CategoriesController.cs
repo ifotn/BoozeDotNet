@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BoozeDotNet.Data;
 using BoozeDotNet.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BoozeDotNet.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -25,6 +27,7 @@ namespace BoozeDotNet.Controllers
               return View(await _context.Categories.OrderBy(c => c.Name).ToListAsync());
         }
 
+        [AllowAnonymous]
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
