@@ -16,7 +16,8 @@ namespace BoozeDotNet.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var categories = _context.Categories.OrderBy(c => c.Name).ToList();
+            return View(categories);
         }
 
         public IActionResult Category(string CategoryName)
@@ -36,6 +37,11 @@ namespace BoozeDotNet.Controllers
                 .ToList();
 
             return View(products);
+        }
+
+        public IActionResult AddToCart(int id)
+        {
+
         }
     }
 }

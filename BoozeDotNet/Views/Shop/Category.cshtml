@@ -26,7 +26,7 @@
                         <h3>@product.Name</h3>
                         <h5>@product.Description</h5>
                         <h5>@String.Format("{0:c}", product.Price)</h5>
-                        @if (product.Photo != null) {
+                        @if (!string.IsNullOrEmpty(product.Photo)) {
                             <img src="~/img/products/@product.Photo" alt="@product.Name Image" class="thumb" />
                         }
                         else {

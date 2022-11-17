@@ -1,44 +1,20 @@
-﻿@{
+﻿@model IEnumerable<BoozeDotNet.Models.Category>
+
+@{
     ViewData["Title"] = "Shop our Store";
 }
 
 <h1>Shop our Store</h1>
 
 <section class="row card-group">
-    <div class="col-lg-4 mb-3">
+    @foreach (var category in Model) {
+     <div class="col-lg-4 mb-3">
         <div class="card mb-4">
             <div class="card-body text-center h-100">
-                <a asp-controller="Shop" asp-action="Category" asp-route-categoryName="Beer" class="btn btn-secondary">Beer</a>
-            </div>
-        </div>
-
-    </div>
-    <div class="col-lg-4 mb-3">
-        <div class="card mb-4">
-            <div class="card-body text-center h-100">
-                <a asp-controller="Shop" asp-action="Category" asp-route-CategoryName="Wine" class="btn btn-secondary">Wine</a>
+                <a asp-controller="Shop" asp-action="Category" 
+                    asp-route-categoryName="@category.Name" class="btn btn-secondary">@category.Name</a>
             </div>
         </div>
     </div>
-    <div class="col-lg-4 mb-3">
-        <div class="card mb-4">
-            <div class="card-body text-center h-100">
-                <a asp-controller="Shop" asp-action="Category" asp-route-CategoryName="Tequila" class="btn btn-secondary">Tequila</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-3">
-        <div class="card mb-4">
-            <div class="card-body text-center h-100">
-                <a asp-controller="Shop" asp-action="Category" asp-route-CategoryName="Cider" class="btn btn-secondary">Cider</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-3">
-        <div class="card mb-4">
-            <div class="card-body text-center h-100">
-                <a asp-controller="Shop" asp-action="Category" asp-route-CategoryName="Whiskey" class="btn btn-secondary">Whiskey</a>
-            </div>
-        </div>
-    </div>
+    }
 </section>
