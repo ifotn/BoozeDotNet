@@ -1,6 +1,7 @@
 ﻿using BoozeDotNet.Data;
 using BoozeDotNet.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BoozeDotNet.Controllers
 {
@@ -44,16 +45,28 @@ namespace BoozeDotNet.Controllers
         {
             var product = _context.Product.Find(id);
 
-            // create new CartItem and populate the fields
-            var cartItem = new CartItem
-            {
-                ProductId = id,
-                Quantity = 1,
-                Price = (decimal)product.Price,
-                CustomerId = GetCustomerId()
-            };
+            // check if this cart already contains this product
+            var cartItem = _context.CartItems.SingleOrDefault(c => c.ProductId == id && c.CustomerId == GetCustomerId());
 
-            _context.Add(cartItem);
+            if (cartItem == null)
+            {
+                // create new CartItem and populate the fields
+                cartItem = new CartItem
+                {
+                    ProductId = id,
+                    Quantity = 1,
+                    Price = (decimal)product.Price,
+                    CustomerId = GetCustomerId()
+                };
+
+                _context.Add(cartItem);
+            }
+            else
+            {
+                cartItem.Quantity += 1;
+                _context.Update(cartItem);
+            }
+            
             _context.SaveChanges();
 
             return RedirectToAction("Cart");
@@ -69,6 +82,31 @@ namespace BoozeDotNet.Controllers
             }
 
             return HttpContext.Session.GetString("CustomerId");
+        }
+
+        // GET: /Shop/Cart => display current user's shopping cart
+        public IActionResult Cart()
+        {
+            // identify which cart to display
+            var customerId = GetCustomerId();
+
+            // join to parent object so we can also show the Product details
+            var cartItems = _context.CartItems
+                .Include(c => c.Product)
+                .Where(c => c.CustomerId == customerId)
+                .ToList();
+
+            // calc cart total for display
+            var total = (from c in cartItems
+                         select c.Quantity * c.Price).Sum();
+            ViewData["Total"] = total;
+
+            // calc and store cart quantity total in a session var for display in navbar
+            var itemCount = (from c in cartItems
+                             select c.Quantity).Sum();
+            HttpContext.Session.SetInt32("ItemCount", itemCount);
+
+            return View(cartItems);
         }
     }
 }

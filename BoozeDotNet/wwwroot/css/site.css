@@ -46,7 +46,7 @@ a:hover {
     color: #B2EBF2;
 }
 
-.btn-primary {
+.btn-primary, .badge-primary {
     background-color:#9E9E9E; 
 }
 

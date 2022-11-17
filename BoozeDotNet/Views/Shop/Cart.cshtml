@@ -1,0 +1,64 @@
+﻿@model IEnumerable<BoozeDotNet.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Cart";
+}
+
+<h1>Cart</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Product)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @if (item.Product.Photo != null) {
+                    <img src="~/img/products/@item.Product.Photo" alt="@item.Product.Name Image" class="thumb" />
+                }
+                else {
+                    <img src="~/img/products/placeholder.gif" alt="@item.Product.Name" />
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Product.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                <a asp-action="RemoveFromCart" asp-route-id="@item.CartItemId">Remove</a>
+            </td>
+        </tr>
+}
+        <tr>
+            <td colspan="3" class="text-center">
+                <a asp-action="Index" class="btn btn-primary">Continue Shopping</a>
+                <a asp-action="Checkout" class="btn btn-primary">Checkout</a>
+            </td>
+            <td>
+                <span class="alert alert-secondary mt-3">
+                    @String.Format("{0:c}", ViewData["Total"])
+                </span>             
+            </td>
+        </tr>
+    </tbody>
+</table>
