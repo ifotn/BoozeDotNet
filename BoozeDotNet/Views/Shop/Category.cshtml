@@ -6,22 +6,44 @@
 
 <h1>You are shopping for @ViewData["CategoryName"]</h1>
 
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a asp-controller="Shop" asp-action="Index">Shop</a>
-        </li>
-        <li class="breadcrumb-item active">
-            @ViewData["CategoryName"]
-        </li>
-    </ol>
-</nav>
-
-<ul>
-    @foreach (var product in Model)
-    {
-        <li>@product.Name</li>
-    }
-</ul>
+@if (Model.Count() > 0) {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-controller="Shop" asp-action="Index">Shop</a>
+            </li>
+            <li class="breadcrumb-item active">
+                @ViewData["CategoryName"]
+            </li>
+        </ol>
+    </nav>
+    <section class="row card-group">
+        @foreach (var product in Model)
+        {
+            <div class="col-lg-4 mb-3">
+                <div class="card mb-4">
+                    <div class="card-body text-center h-100">
+                        <h3>@product.Name</h3>
+                        <h5>@product.Description</h5>
+                        <h5>@String.Format("{0:c}", product.Price)</h5>
+                        @if (product.Photo != null) {
+                            <img src="~/img/products/@product.Photo" alt="@product.Name Image" class="thumb" />
+                        }
+                        else {
+                            <img src="~/img/products/placeholder.gif" alt="@product.Name Image" />
+                        }  
+                        <div>
+                            <button class="btn btn-primary m-3">Add To Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </section>
+}
+else {
+    <h2>We don't currently have any @ViewData["CategoryName"] so you'll just have to drink something else.</h2>
+}
+    
 
 <a class="btn btn-primary" href="javascript:history.go(-1)"><< Back</a>

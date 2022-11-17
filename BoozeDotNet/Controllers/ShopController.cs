@@ -1,10 +1,19 @@
-﻿using BoozeDotNet.Models;
+﻿using BoozeDotNet.Data;
+using BoozeDotNet.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BoozeDotNet.Controllers
 {
     public class ShopController : Controller
     {
+        // manually add db connection dependency (auto-generated in scaffolded controllers but this is custom)
+        private readonly ApplicationDbContext _context;
+
+        public ShopController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
             return View();
@@ -20,13 +29,11 @@ namespace BoozeDotNet.Controllers
             // pass input param val to ViewData for display in the view
             ViewData["CategoryName"] = CategoryName;
 
-            // use Product model to mock a list of products for display
-            var products = new List<Product>();
-
-            for (var i = 1; i < 11; i++)
-            {
-                products.Add(new Product { ProductId = i, Name = "Product " + i.ToString() });
-            }
+            // fetch products for display
+            var products = _context.Product
+                .Where(p => p.Category.Name == CategoryName)
+                .OrderBy(p => p.Name)
+                .ToList();
 
             return View(products);
         }
