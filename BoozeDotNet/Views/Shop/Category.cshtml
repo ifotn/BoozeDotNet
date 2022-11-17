@@ -33,7 +33,9 @@
                             <img src="~/img/products/placeholder.gif" alt="@product.Name Image" />
                         }  
                         <div>
-                            <button class="btn btn-primary m-3">Add To Cart</button>
+                            <a asp-action="AddToCart" asp-route-id="@product.ProductId">
+                                <button class="btn btn-primary m-3">Add To Cart</button>
+                            </a>                              
                         </div>
                     </div>
                 </div>

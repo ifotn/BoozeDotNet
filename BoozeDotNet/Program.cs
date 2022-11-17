@@ -26,6 +26,8 @@ builder.Services.AddAuthentication()
         options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     });
 
+// session support
+builder.Services.AddSession();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -63,4 +65,6 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "BoozeDotNet API Documentation V1");
 });
 
+// enable sessions
+app.UseSession();
 app.Run();

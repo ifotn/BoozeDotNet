@@ -39,9 +39,36 @@ namespace BoozeDotNet.Controllers
             return View(products);
         }
 
+        // GET: /products/AddToCart/401 => id param represents selected ProductId
         public IActionResult AddToCart(int id)
         {
+            var product = _context.Product.Find(id);
 
+            // create new CartItem and populate the fields
+            var cartItem = new CartItem
+            {
+                ProductId = id,
+                Quantity = 1,
+                Price = (decimal)product.Price,
+                CustomerId = GetCustomerId()
+            };
+
+            _context.Add(cartItem);
+            _context.SaveChanges();
+
+            return RedirectToAction("Cart");
+        }
+
+        private string GetCustomerId()
+        {
+            // check if we already have a session var for CustomerId
+            if (HttpContext.Session.GetString("CustomerId") == null)
+            {
+                // create new session var of type string using a Guid
+                HttpContext.Session.SetString("CustomerId", Guid.NewGuid().ToString());
+            }
+
+            return HttpContext.Session.GetString("CustomerId");
         }
     }
 }
