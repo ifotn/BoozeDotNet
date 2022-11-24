@@ -55,10 +55,11 @@
                 <a asp-action="Checkout" class="btn btn-primary">Checkout</a>
             </td>
             <td>
-                <span class="alert alert-secondary mt-3">
+                <span class="fw-bold">
                     @String.Format("{0:c}", ViewData["Total"])
                 </span>             
             </td>
+            <td></td>
         </tr>
     </tbody>
 </table>

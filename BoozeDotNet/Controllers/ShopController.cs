@@ -1,5 +1,6 @@
 ﻿using BoozeDotNet.Data;
 using BoozeDotNet.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -107,6 +108,31 @@ namespace BoozeDotNet.Controllers
             HttpContext.Session.SetInt32("ItemCount", itemCount);
 
             return View(cartItems);
+        }
+
+        // GET: /Shop/Checkout => show empty checkout page to capture customer info
+        [Authorize]
+        public IActionResult Checkout()
+        {
+            return View();
+        }
+
+        // POST: /Shop/Checkout => create Order object and store as session var before payment
+        [HttpPost]
+        [Authorize]
+        public IActionResult Checkout([Bind("FirstName,LastName,Address,City,Province,PostalCode,Phone")] Order order)
+        {
+            // 7 fields bound from form inputs in method header
+            // now auto-fill 3 of the fields we removed from the form
+            order.OrderDate = DateTime.Now;
+            order.CustomerId = User.Identity.Name;
+
+            order.OrderTotal = (from c in _context.CartItems
+                                where c.CustomerId == HttpContext.Session.GetString("CustomerId")
+                                select c.Quantity * c.Price).Sum();
+
+            // store the order as session var so we can proceed to payment attempt
+            //HttpContext.Session.Se
         }
     }
 }
