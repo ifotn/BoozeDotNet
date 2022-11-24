@@ -3,6 +3,9 @@ using BoozeDotNet.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
+using Stripe.Checkout;
+using System.Configuration;
 
 namespace BoozeDotNet.Controllers
 {
@@ -11,9 +14,13 @@ namespace BoozeDotNet.Controllers
         // manually add db connection dependency (auto-generated in scaffolded controllers but this is custom)
         private readonly ApplicationDbContext _context;
 
-        public ShopController(ApplicationDbContext context)
+        // add Configuration dependency so we can read the Stripe API key from appsettings or the Azure Config section
+        private readonly IConfiguration _configuration;
+
+        public ShopController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -136,6 +143,46 @@ namespace BoozeDotNet.Controllers
 
             // redirect to payment
             return RedirectToAction("Payment");
+        }
+
+        // GET: /Shop/Payment => invoke Stripe payment session which displays their payment form
+        [Authorize]
+        public IActionResult Payment()
+        {
+            // get the order from the session var
+            var order = HttpContext.Session.GetObject<Order>("Order");
+
+            // get the api key from the site config
+            StripeConfiguration.ApiKey = _configuration.GetValue<string>("Stripe:SecretKey");
+
+            // stripe invocation from https://stripe.com/docs/checkout/quickstart?client=html
+            var options = new SessionCreateOptions
+            {
+                LineItems = new List<SessionLineItemOptions>
+                {
+                  new SessionLineItemOptions
+                  {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        UnitAmount = (long?)(order.OrderTotal * 100), // total must be in cents, not dollars and cents
+                        Currency = "cad",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = "BoozeDotNet Purchase"
+                        },
+                    },
+                    Quantity = 1,
+                  },
+                },
+                Mode = "payment",
+                SuccessUrl = "https://" + Request.Host + "/Shop/SaveOrder",
+                CancelUrl = "https://" + Request.Host + "/Shop/Cart"
+            };
+            var service = new SessionService();
+            Session session = service.Create(options);
+
+            Response.Headers.Add("Location", session.Url);
+            return new StatusCodeResult(303);
         }
     }
 }
