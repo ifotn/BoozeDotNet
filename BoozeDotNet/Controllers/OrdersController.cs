@@ -24,7 +24,23 @@ namespace BoozeDotNet.Controllers
         // GET: Orders
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Orders.ToListAsync());
+            if (!User.IsInRole("Administrator"))
+            {
+                // customers only see their own orders
+                var orders = await _context.Orders
+                    .Where(o => o.CustomerId == User.Identity.Name)
+                    .OrderByDescending(o => o.OrderId)
+                    .ToListAsync();
+                return View(orders);
+            }
+            else
+            {
+                // Administrator can see all orders with no filter
+                var orders = await _context.Orders
+                    .OrderByDescending(o => o.OrderId)
+                    .ToListAsync();
+                return View(orders);
+            }            
         }
 
         // GET: Orders/Details/5
@@ -35,124 +51,35 @@ namespace BoozeDotNet.Controllers
                 return NotFound();
             }
 
-            var order = await _context.Orders
-                .FirstOrDefaultAsync(m => m.OrderId == id);
-            if (order == null)
+            if (User.IsInRole("Administrator"))
             {
-                return NotFound();
-            }
-
-            return View(order);
-        }
-
-        // GET: Orders/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Orders/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("OrderId,OrderDate,OrderTotal,FirstName,LastName,Address,City,Province,PostalCode,Phone,CustomerId,PaymentCode")] Order order)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(order);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(order);
-        }
-
-        // GET: Orders/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Orders == null)
-            {
-                return NotFound();
-            }
-
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-            return View(order);
-        }
-
-        // POST: Orders/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("OrderId,OrderDate,OrderTotal,FirstName,LastName,Address,City,Province,PostalCode,Phone,CustomerId,PaymentCode")] Order order)
-        {
-            if (id != order.OrderId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                var order = await _context.Orders
+                    .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                    .FirstOrDefaultAsync(m => m.OrderId == id);
+                
+                if (order == null)
                 {
-                    _context.Update(order);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                return View(order);
+            }
+            else
+            {
+                // only fetch the order if it belongs to the customer that is currently logged in
+                var order = await _context.Orders
+                    .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                    .Where(o => o.CustomerId == User.Identity.Name)
+                    .FirstOrDefaultAsync(m => m.OrderId == id);
+                if (order == null)
                 {
-                    if (!OrderExists(order.OrderId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return RedirectToAction("Index");
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(order);
-        }
 
-        // GET: Orders/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Orders == null)
-            {
-                return NotFound();
+                return View(order);
             }
-
-            var order = await _context.Orders
-                .FirstOrDefaultAsync(m => m.OrderId == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return View(order);
-        }
-
-        // POST: Orders/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Orders == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Orders'  is null.");
-            }
-            var order = await _context.Orders.FindAsync(id);
-            if (order != null)
-            {
-                _context.Orders.Remove(order);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
         private bool OrderExists(int id)

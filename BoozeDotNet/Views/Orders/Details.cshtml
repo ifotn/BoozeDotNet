@@ -1,13 +1,12 @@
 ﻿@model BoozeDotNet.Models.Order
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Order Details";
 }
 
-<h1>Details</h1>
+<h1>Order #: @Model.OrderId</h1>
 
 <div>
-    <h4>Order</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -78,7 +77,23 @@
         </dd>
     </dl>
 </div>
+<section>
+    <h2>Order Items</h2>
+    <table class="table table-striped">
+        <thead>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+        </thead>
+        @foreach (var detail in Model.OrderDetails) {
+            <tr>
+                <td>@detail.Product.Name</td>
+                <td>@detail.Quantity</td>
+                <td>@String.Format("{0:c}", detail.Price)</td>
+            </tr>
+        }
+    </table>
+</section>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.OrderId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
