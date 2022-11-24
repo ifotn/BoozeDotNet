@@ -184,5 +184,51 @@ namespace BoozeDotNet.Controllers
             Response.Headers.Add("Location", session.Url);
             return new StatusCodeResult(303);
         }
+
+        // GET: /Shop/SaveOrder => create Order in DB, add OrderDetails, clear cart
+        [Authorize]
+        public IActionResult SaveOrder()
+        {
+            // get the order from session var
+            var order = HttpContext.Session.GetObject<Order>("Order");
+
+            // fill required PaymentCode temporarily
+            order.PaymentCode = HttpContext.Session.GetString("CustomerId");
+
+            // save new order to db
+            _context.Add(order);
+            _context.SaveChanges();
+
+            // save each CartItem as a new OrderDetails record for this order
+            var cartItems = _context.CartItems.Where(c => c.CustomerId == HttpContext.Session.GetString("CustomerId"));
+
+            foreach (var item in cartItems)
+            {
+                var orderDetail = new OrderDetail
+                {
+                    Quantity = item.Quantity,
+                    ProductId = item.ProductId,
+                    Price = item.Price,
+                    OrderId = order.OrderId
+                };
+                _context.Add(orderDetail);
+            }
+            _context.SaveChanges();
+
+            // empty cart
+            foreach (var item in cartItems)
+            {
+                _context.Remove(item);
+            }
+            _context.SaveChanges();
+
+            // clear session vars
+            HttpContext.Session.SetInt32("ItemCount", 0);
+            HttpContext.Session.SetString("CustomerId", "");
+            HttpContext.Session.SetObject("Order", null);
+
+            // redirect to Order Confirmation
+            return RedirectToAction("Details", "Orders", new { @id = order.OrderId });
+        }
     }
 }
