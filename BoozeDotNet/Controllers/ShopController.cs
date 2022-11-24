@@ -132,7 +132,10 @@ namespace BoozeDotNet.Controllers
                                 select c.Quantity * c.Price).Sum();
 
             // store the order as session var so we can proceed to payment attempt
-            //HttpContext.Session.Se
+            HttpContext.Session.SetObject("Order", order);
+
+            // redirect to payment
+            return RedirectToAction("Payment");
         }
     }
 }
