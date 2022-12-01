@@ -34,7 +34,8 @@ namespace BoozeDotNet.Controllers
         {
             if (id == null || _context.Product == null)
             {
-                return NotFound();
+                //return NotFound();
+                return View("404");
             }
 
             var product = await _context.Product
@@ -42,10 +43,10 @@ namespace BoozeDotNet.Controllers
                 .FirstOrDefaultAsync(m => m.ProductId == id);
             if (product == null)
             {
-                return NotFound();
+                return View("404");
             }
 
-            return View(product);
+            return View("Details", product);
         }
 
         // GET: Products/Create

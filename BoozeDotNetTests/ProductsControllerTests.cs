@@ -45,6 +45,7 @@ namespace BoozeDotNetTests
             controller = new ProductsController(context);
         }
 
+        #region "Index"
         [TestMethod]
         public void IndexLoadsView()
         {
@@ -68,8 +69,61 @@ namespace BoozeDotNetTests
             // assert
             CollectionAssert.AreEqual(context.Product.OrderBy(p => p.Name).ToList(), model);
         }
+        #endregion
+
+        #region "Details"
+        [TestMethod]
+        public void DetailsNoIdLoads404()
+        {
+            // act
+            var result = (ViewResult)controller.Details(null).Result;
+
+            // assert 
+            Assert.AreEqual("404", result.ViewName);
+        }
 
         [TestMethod]
-        public void 
+        public void DetailsNoProductsTableLoads404()
+        {
+            // arrange
+            context.Product = null;
+
+            // act
+            var result = (ViewResult)controller.Details(null).Result;
+
+            // assert 
+            Assert.AreEqual("404", result.ViewName);
+        }
+
+        [TestMethod]
+        public void DetailsInvalidIdLoads404()
+        {
+            // act
+            var result = (ViewResult)controller.Details(23).Result;
+
+            // assert 
+            Assert.AreEqual("404", result.ViewName);
+        }
+
+        [TestMethod]
+        public void DetailsValidIdLoadsView()
+        {
+            // act
+            var result = (ViewResult)controller.Details(104).Result;
+
+            // assert 
+            Assert.AreEqual("Details", result.ViewName);
+        }
+
+        [TestMethod]
+        public void DetailsValidIdLoadsProduct()
+        {
+            // act
+            var result = (ViewResult)controller.Details(104).Result;
+
+            // assert 
+            Assert.AreEqual(context.Product.Find(104), result.Model);
+        }
+        #endregion
     }
 }
